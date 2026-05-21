@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>just for you ✨</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-grad-1: #ffe4ec;
+            --bg-grad-2: #fff5e4;
+            --bg-grad-3: #ffd6cc;
+            --accent-pink: #fda4af;
+            --text-main: #7a6a6f;
+            --text-heading: #e89eb0;
+            --text-dark: #d48c9c;
+            --glass-bg: rgba(255, 255, 255, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --glass-shadow: 0 15px 45px 0 rgba(255, 182, 193, 0.4);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            color: var(--text-main);
+            background: linear-gradient(135deg, var(--bg-grad-1), var(--bg-grad-2), var(--bg-grad-3));
+            background-size: 200% 200%;
+            animation: gradientMove 15s ease infinite;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: crosshair;
+        }
+
+        /* --- BACKGROUND ORBS --- */
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); z-index: 0; opacity: 0.6; animation: floatOrb 10s ease-in-out infinite alternate; }
+        .orb-1 { width: 350px; height: 350px; background: #fda4af; top: -5%; left: -5%; mix-blend-mode: multiply; }
+        .orb-2 { width: 350px; height: 350px; background: #ffd6cc; bottom: -5%; right: -5%; mix-blend-mode: multiply; animation-delay: -5s; }
+        .orb-3 { width: 250px; height: 250px; background: #f3e8ff; top: 30%; left: 20%; animation: floatOrb2 12s ease-in-out infinite alternate; }
+
+        /* --- MUSIC CONTROLLER --- */
+        .music-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            cursor: pointer;
+            z-index: 999;
+            box-shadow: 0 4px 15px rgba(253, 164, 175, 0.3);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        .music-toggle:hover { transform: scale(1.1); background: rgba(255, 255, 255, 0.9); }
+        .music-toggle.playing { animation: spin 4s linear infinite; }
+
+        h1, h2, h3 { font-family: 'Caveat', cursive; color: var(--text-heading); font-weight: 700; }
+        
+        /* --- MOBILE PERFECT GLASS CARD --- */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 40px;
+            box-shadow: var(--glass-shadow);
+            padding: 30px 20px;
+            width: 100%;
+            max-width: 390px;
+            height: 100%;
+            max-height: 844px;
+            z-index: 10;
+            position: relative;
+            overflow-y: auto;
+            scrollbar-width: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        @media (max-width: 400px) and (max-height: 850px) {
+            .glass-card { border-radius: 0; border: none; max-width: 100%; max-height: 100%; padding: 25px 15px;}
+            .music-toggle { top: 15px; right: 15px; }
+        }
+        
+        .glass-card::-webkit-scrollbar { display: none; }
+
+        /* --- SLIDE LOGIC --- */
+        .slide { 
+            display: none; opacity: 0; flex-direction: column; align-items: center; 
+            text-align: center; transform: scale(0.95) translateY(10px); 
+            transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1); 
+            padding-bottom: 20px;
+        }
+        .slide.active { display: flex; opacity: 1; transform: scale(1) translateY(0); }
+
+        /* --- BUTTONS --- */
+        .btn {
+            background: linear-gradient(to right, var(--accent-pink), #ffc1b3);
+            color: white; border: none; padding: 14px 32px; border-radius: 30px;
+            font-family: 'Quicksand', sans-serif; font-size: 1rem; font-weight: 600;
+            cursor: pointer; box-shadow: 0 8px 20px rgba(253, 164, 175, 0.4);
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); margin-top: 15px;
+            width: 80%; max-width: 280px;
+        }
+        .btn:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 12px 25px rgba(253, 164, 175, 0.6); }
+        .btn-outline { background: rgba(255,255,255,0.7); color: var(--text-dark); border: 1px solid white; box-shadow: none; }
+
+        /* --- SLIDE 1: OTP PASSWORD --- */
+        .passcode-container { display: flex; gap: 10px; margin: 20px 0; justify-content: center; }
+        .otp-box {
+            width: 45px; height: 55px; text-align: center; font-size: 1.8rem; font-weight: 600;
+            border-radius: 14px; border: 2px solid rgba(255,255,255,0.6);
+            background: rgba(255,255,255,0.5); color: var(--text-dark);
+            outline: none; transition: 0.3s; font-family: 'Quicksand', sans-serif;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+            padding: 0;
+        }
+        .otp-box:focus { border-color: var(--accent-pink); background: rgba(255,255,255,0.9); transform: translateY(-2px); }
+        .hint-text { margin-top: 10px; font-size: 0.9rem; font-weight: 500; color: #c47686; min-height: 20px; transition: 0.3s; opacity: 0; }
+        .hint-text.show { opacity: 1; animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+        /* --- SLIDE 2: MOODS --- */
+        .mood-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-top: 20px; }
+        .mood-btn {
+            background: rgba(255,255,255,0.5); border: 2px solid rgba(255,255,255,0.6);
+            padding: 14px 8px; border-radius: 16px; cursor: pointer; transition: 0.3s;
+            font-family: 'Quicksand', sans-serif; font-weight: 600; color: var(--text-main); font-size: 0.85rem;
+            backdrop-filter: blur(5px);
+        }
+        .mood-btn:hover, .mood-btn.selected { 
+            background: rgba(255,255,255,0.95); border-color: var(--accent-pink); 
+            color: var(--text-dark); transform: scale(1.05) translateY(-2px); 
+            box-shadow: 0 8px 20px rgba(253, 164, 175, 0.2);
+        }
+        .typing-indicator { display: none; margin-top: 15px; font-size: 0.9rem; font-weight: bold; color: var(--accent-pink); letter-spacing: 2px; animation: pulse 1s infinite; }
+        .mood-response { margin-top: 15px; padding: 16px; background: rgba(255,255,255,0.8); border-radius: 16px; color: var(--text-dark); font-size: 0.95rem; font-weight: 600; display: none; border: 1px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+
+        /* --- SLIDE 3: OPEN WHEN --- */
+        .envelope-container { width: 100%; display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+        .envelope {
+            background: rgba(255,255,255,0.6); border: 2px solid rgba(255,255,255,0.8);
+            border-radius: 18px; overflow: hidden; cursor: pointer; transition: all 0.4s ease; text-align: left;
+            position: relative;
+        }
+        .envelope-header { padding: 16px 18px; font-weight: 600; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center; }
+        .envelope-header span.icon { transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); font-size: 1.1rem; }
+        .envelope-body { padding: 0 18px; max-height: 0; overflow: hidden; transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); color: var(--text-dark); font-size: 0.9rem; font-weight: 600; line-height: 1.4; opacity: 0; }
+        .envelope.open { background: rgba(255,255,255,0.95); border-color: var(--accent-pink); box-shadow: 0 8px 20px rgba(253, 164, 175, 0.2); }
+        .envelope.open .envelope-body { padding: 0 18px 20px 18px; max-height: 400px; opacity: 1; }
+        .envelope.open .envelope-header span.icon { transform: rotate(180deg) scale(1.2); color: var(--accent-pink); }
+
+        /* --- SLIDE 4: 3D VIBE CARDS --- */
+        .vibe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; margin-top: 20px; margin-bottom: 20px; }
+        .vibe-card { perspective: 1000px; min-height: 135px; cursor: pointer; }
+        .vibe-card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; }
+        .vibe-card.flipped .vibe-card-inner { transform: rotateY(180deg); }
+        .vibe-front, .vibe-back {
+            position: absolute; width: 100%; height: 100%;
+            backface-visibility: hidden; border-radius: 20px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 12px; border: 2px solid rgba(255,255,255,0.8);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+        .vibe-front { background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,255,255,0.4)); }
+        .vibe-back { background: rgba(255,255,255,0.95); transform: rotateY(180deg); text-align: center; color: var(--text-dark); border-color: var(--accent-pink); }
+        .vibe-icon { font-size: 2.2rem; margin-bottom: 8px; transition: 0.3s; }
+        .vibe-text { font-size: 0.85rem; font-weight: 700; line-height: 1.2; text-align: center; }
+        .vibe-back-text { font-size: 0.8rem; font-weight: 700; line-height: 1.3; }
+
+        /* --- SLIDE 5: ENDING & QR --- */
+        .qr-box { background: rgba(255,255,255,0.9); padding: 10px; border-radius: 18px; box-shadow: 0 8px 20px rgba(253, 164, 175, 0.3); border: 2px solid white; transition: transform 0.3s ease; }
+        .qr-box img { width: 120px; height: 120px; border-radius: 6px; display: block; }
+
+        /* --- PARTICLES & CURSOR --- */
+        .particle { position: absolute; pointer-events: none; opacity: 0; z-index: 100; font-size: 1.2rem; }
+        .cursor-trail { position: absolute; pointer-events: none; z-index: 999; border-radius: 50%; background: white; box-shadow: 0 0 8px rgba(253, 164, 175, 0.8); animation: trailFade 0.6s linear forwards; }
+
+        /* --- KEYFRAMES --- */
+        @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes floatOrb { 0% { transform: translate(0, 0); } 100% { transform: translate(20px, -30px); } }
+        @keyframes floatOrb2 { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(-30px, 20px) scale(1.1); } }
+        @keyframes floatUp { 0% { opacity: 0; transform: translateY(50px) scale(0.5); } 20% { opacity: 1; } 80% { opacity: 0.8; } 100% { opacity: 0; transform: translateY(-600px) scale(1.2) rotate(360deg); } }
+        @keyframes popIn { 0% { opacity: 0; transform: scale(0.9) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+        @keyframes trailFade { 0% { width: 10px; height: 10px; opacity: 0.8; transform: scale(1); } 100% { width: 0px; height: 0px; opacity: 0; transform: scale(2); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <!-- AUDIO ELEMENT -->
+    <audio id="bgMusic" loop>
+        <source src="inaam.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Background Orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <div class="glass-card" id="main-card">
+        
+        <!-- FLOATING MUSIC TOGGLE -->
+        <div class="music-toggle" id="musicToggle" onclick="toggleMusic()" style="display: none;">🎵</div>
+
+        <!-- SLIDE 1: Password -->
+        <div id="slide-0" class="slide active" style="margin-top: 20px;">
+            <h1 style="font-size: 2.2rem; line-height: 1.1; margin-bottom: 5px;">made for the most<br>important one ✨</h1>
+            <p style="font-size: 0.9rem; opacity: 0.8; margin-top: 8px;">enter the passcode to unlock</p>
+            
+            <div class="passcode-container" id="otp-container">
+                <input type="text" class="otp-box" maxlength="1" onkeyup="moveToNext(this, event, 1)" inputmode="numeric">
+                <input type="text" class="otp-box" maxlength="1" onkeyup="moveToNext(this, event, 2)" inputmode="numeric">
+                <input type="text" class="otp-box" maxlength="1" onkeyup="moveToNext(this, event, 3)" inputmode="numeric">
+                <input type="text" class="otp-box" maxlength="1" onkeyup="checkPassword(event)" inputmode="numeric">
+            </div>
+            
+            <div id="hint-text" class="hint-text"></div>
+        </div>
+
+        <!-- SLIDE 2: Moods -->
+        <div id="slide-1" class="slide">
+            <h2 style="font-size: 2rem;">choose your<br>emergency mood</h2>
+            <div class="mood-grid" id="mood-grid"></div>
+            <div id="typing-indicator" class="typing-indicator">typing...</div>
+            <div id="mood-response" class="mood-response"></div>
+            <button class="btn btn-outline" style="margin-top: 20px; display: none;" id="btn-next-2" onclick="nextSlide(2)">continue ✨ &rarr;</button>
+        </div>
+
+        <!-- SLIDE 3: Open When -->
+        <div id="slide-2" class="slide">
+            <h2 style="font-size: 2rem;">little letters for u 💌</h2>
+            <div class="envelope-container" id="envelope-container"></div>
+            <button class="btn btn-outline" style="margin-top: 20px;" onclick="nextSlide(3)">next vibe 🎧 &rarr;</button>
+        </div>
+
+        <!-- SLIDE 4: Vibe -->
+        <div id="slide-3" class="slide">
+            <h2 style="font-size: 2.2rem;">our vibe 🎧</h2>
+            <p style="font-size: 0.8rem; color: #a9858c; margin-top: -5px; margin-bottom: 5px;">(tap the cards ✨)</p>
+            <div class="vibe-grid" id="vibe-grid"></div>
+            <button class="btn" onclick="nextSlide(4)">one last thing 💌</button>
+        </div>
+
+        <!-- SLIDE 5: Ending & QR -->
+        <div id="slide-4" class="slide">
+            <h2 style="font-size: 2.6rem; margin-bottom: 5px;">thank you<br>Marshmallow</h2>
+            <p style="font-size: 1.05rem; line-height: 1.4; color: var(--text-dark); font-weight: 600; margin-bottom: 15px;">
+                i will be there holding your hands forever in each and every situation<br><br>
+                Love You 😚
+            </p>
+
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <p style="font-size: 0.85rem; color: #a9858c; margin-bottom: 8px; font-weight: 600;">scan for one last surprise ✨</p>
+                <div class="qr-box" onmouseover="this.style.transform='scale(1.05) rotate(2deg)'" onmouseout="this.style.transform='scale(1) rotate(0deg)'">
+                    <img id="final-qr" src="" alt="Secret QR Code">
+                </div>
+                <p style="font-size: 0.7rem; color: #a9858c; margin-top: 8px; opacity: 0.8;">(take a screenshot to scan from your gallery)</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MAIN INTERACTIVE LOGIC -->
+    <script>
+        // ==========================================
+        // 🛠️ THE CONFIGURATION HUB
+        // ==========================================
+        const CONFIG = {
+            passcode: "0915", 
+            
+            hints: [
+                "", 
+                "hint: it’s connected to both of us somehow ✨",
+                "hint: first two digits are yours ♡",
+                "hint: last two digits are mine ✨",
+                "hint: try putting them together 🌷"
+            ],
+
+            moods: [
+                { label: "chaotic 🌪️", response: "prescription: snacks + music + me 🍿" },
+                { label: "sleepy 💤", response: "time to become a cozy burrito 🌯" },
+                { label: "dramatic 💅", response: "dramatic levels detected 🚨 (i am listening, spill everything)" },
+                { label: "low battery 🪫", response: "sending emergency virtual recharge hugs 🔋" },
+                { label: "overthinking 🤔", response: "certified overthinker behavior. brain off now please 🛑" },
+                { label: "needs attention 🥺", response: "hello hi i am right here giving you all the attention 🙋‍♂️" }
+            ],
+
+            envelopes: [
+                { title: "open when stressed", message: "take a deep breath, close your eyes for a second. i know things feel super heavy right now and your mind is running a hundred miles an hour, but you are so much stronger than you realize. i believe in you completely, and i'm always in your corner cheering you on. whatever it is, we will handle it. it's going to be okay, i promise." },
+                { title: "open when life feels weird", message: "some days are just off, and the world feels a little upside down. when everything feels chaotic, just remember you have a safe space right here with me. we can eat ice cream, talk about absolutely nothing, or just sit in comfortable silence until the weirdness passes." },
+                { title: "open when u miss me", message: "i'm literally always just a text or call away! honestly, i'm probably thinking about you right now and waiting for your name to pop up on my screen. never hesitate to bother me, because hearing from you is always the absolute highlight of my day." },
+                { title: "open when u need a smile", message: "if you could see yourself the way i see you, you'd never stop smiling. you have this incredible energy that lights up the room, and the absolute cutest smile that melts my heart every single time. whatever is bringing you down today, just know you are deeply cherished." }
+            ],
+
+            vibes: [
+                { icon: "🌙", title: "late night<br>talks", message: "those quiet hours where we just talk about everything. my favorite place." },
+                { icon: "🎢", title: "random<br>chaos", message: "from completely unhinged moments to absolute peace together." },
+                { icon: "✨", title: "soft happy<br>energy", message: "you bring this rare, beautiful light into my life." },
+                { icon: "📱", title: "wanna<br>text you", message: "every funny video, you're always the first person i want to share it with." }
+            ],
+
+            // 📸 THE LINK FOR THE FINAL QR CODE (OPENS DIRECTLY IN APP)
+            finalQrLink: "spotify:track:5haZbtveqI9v1svcc5IDx6"
+        };
+        // ==========================================
+
+        window.onload = () => {
+            // Generate Moods
+            const moodGrid = document.getElementById('mood-grid');
+            CONFIG.moods.forEach((mood) => {
+                moodGrid.innerHTML += `<button class="mood-btn" onclick="setMood(this, '${mood.response}')">${mood.label}</button>`;
+            });
+
+            // Generate Envelopes
+            const envContainer = document.getElementById('envelope-container');
+            CONFIG.envelopes.forEach(env => {
+                envContainer.innerHTML += `
+                    <div class="envelope" onclick="toggleEnvelope(this)">
+                        <div class="envelope-header">${env.title} <span class="icon">🌸</span></div>
+                        <div class="envelope-body"><div style="padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.7);">${env.message}</div></div>
+                    </div>`;
+            });
+
+            // Generate Vibe Cards
+            const vibeGrid = document.getElementById('vibe-grid');
+            CONFIG.vibes.forEach(vibe => {
+                vibeGrid.innerHTML += `
+                    <div class="vibe-card" onclick="this.classList.toggle('flipped')">
+                        <div class="vibe-card-inner">
+                            <div class="vibe-front">
+                                <div class="vibe-icon">${vibe.icon}</div>
+                                <div class="vibe-text">${vibe.title}</div>
+                            </div>
+                            <div class="vibe-back">
+                                <div class="vibe-back-text">${vibe.message}</div>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+
+            // Generate Custom QR Code
+            document.getElementById('final-qr').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&color=d48c9c&bgcolor=ffffff&data=${encodeURIComponent(CONFIG.finalQrLink)}`;
+        };
+
+        // AUDIO LOGIC
+        const bgMusic = document.getElementById('bgMusic');
+        const musicToggle = document.getElementById('musicToggle');
+        let isPlaying = false;
+
+        function playMusic() {
+            bgMusic.play().then(() => {
+                isPlaying = true;
+                musicToggle.style.display = 'flex';
+                musicToggle.classList.add('playing');
+                musicToggle.innerText = '🎵';
+            }).catch(e => console.log("Audio autoplay blocked."));
+        }
+
+        function toggleMusic() {
+            if (isPlaying) {
+                bgMusic.pause();
+                musicToggle.classList.remove('playing');
+                musicToggle.innerText = '🔇';
+            } else {
+                bgMusic.play();
+                musicToggle.classList.add('playing');
+                musicToggle.innerText = '🎵';
+            }
+            isPlaying = !isPlaying;
+        }
+
+        // OTP LOGIC
+        const inputs = document.querySelectorAll('.otp-box');
+        let attempts = 0;
+
+        function moveToNext(current, event, nextIndex) {
+            if (current.value.length === 1 && nextIndex < 4) inputs[nextIndex].focus();
+            if (event.key === "Backspace" && nextIndex - 2 >= 0) inputs[nextIndex - 2].focus();
+        }
+
+        function checkPassword(event) {
+            let guess = "";
+            inputs.forEach(input => guess += input.value);
+            
+            if (guess.length === 4) {
+                if (guess === CONFIG.passcode) {
+                    triggerConfetti();
+                    playMusic(); 
+                    inputs.forEach(input => input.blur());
+                    setTimeout(() => nextSlide(1), 800);
+                } else {
+                    attempts++;
+                    document.getElementById('otp-container').style.animation = "shake 0.4s ease";
+                    setTimeout(() => document.getElementById('otp-container').style.animation = "", 400);
+                    
+                    inputs.forEach(input => input.value = "");
+                    inputs[0].focus();
+
+                    const hintDisplay = document.getElementById('hint-text');
+                    let hintIndex = Math.min(attempts, CONFIG.hints.length - 1);
+                    hintDisplay.innerText = CONFIG.hints[hintIndex];
+                    
+                    hintDisplay.classList.remove('show');
+                    void hintDisplay.offsetWidth; 
+                    hintDisplay.classList.add('show');
+                }
+            } else if (event.key === "Backspace") {
+                inputs[2].focus();
+            }
+        }
+
+        // MOOD LOGIC
+        function setMood(btn, responseText) {
+            document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            
+            const responseBox = document.getElementById('mood-response');
+            const typer = document.getElementById('typing-indicator');
+            const nextBtn = document.getElementById('btn-next-2');
+            
+            responseBox.style.display = 'none';
+            typer.style.display = 'block';
+            
+            setTimeout(() => {
+                typer.style.display = 'none';
+                responseBox.innerHTML = responseText;
+                responseBox.style.display = 'block';
+                responseBox.style.animation = "popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)";
+                nextBtn.style.display = 'inline-block';
+                nextBtn.style.animation = "popIn 0.4s ease forwards";
+            }, 1000); 
+        }
+
+        // ENVELOPE LOGIC
+        function toggleEnvelope(el) {
+            const isOpen = el.classList.contains('open');
+            document.querySelectorAll('.envelope').forEach(env => env.classList.remove('open'));
+            if(!isOpen) el.classList.add('open');
+        }
+
+        function nextSlide(slideIndex) {
+            document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+            document.getElementById('slide-' + slideIndex).classList.add('active');
+        }
+
+        // PARTICLES & CONFETTI
+        const bgEmojis = ['✨', '🌸', '🤍', '🫧'];
+        function createBackgroundParticle() {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            particle.innerText = bgEmojis[Math.floor(Math.random() * bgEmojis.length)];
+            particle.style.left = Math.random() * 100 + 'vw';
+            const duration = Math.random() * 6 + 6; 
+            particle.style.animation = `floatUp ${duration}s linear forwards`;
+            document.body.appendChild(particle);
+            setTimeout(() => particle.remove(), duration * 1000);
+        }
+        setInterval(createBackgroundParticle, 600);
+
+        function triggerConfetti() {
+            for(let i=0; i<30; i++) {
+                const conf = document.createElement('div');
+                conf.classList.add('particle');
+                conf.innerText = ['🎉','✨','💖','🌷'][Math.floor(Math.random()*4)];
+                conf.style.left = '50%'; conf.style.top = '50%';
+                
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = 50 + Math.random() * 80;
+                const tx = Math.cos(angle) * velocity;
+                const ty = Math.sin(angle) * velocity - 80;
+
+                conf.style.transition = "all 1s cubic-bezier(0.2, 0.8, 0.2, 1)";
+                conf.style.transform = `translate(-50%, -50%) scale(0)`;
+                conf.style.opacity = '1';
+                
+                document.body.appendChild(conf);
+                
+                setTimeout(() => {
+                    conf.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(1.5) rotate(${Math.random()*360}deg)`;
+                    conf.style.opacity = '0';
+                }, 10);
+                setTimeout(() => conf.remove(), 1000);
+            }
+        }
+
+        // SPARKLE TRAIL
+        document.addEventListener('mousemove', function(e) {
+            if (Math.random() > 0.7) { 
+                const trail = document.createElement('div');
+                trail.className = 'cursor-trail';
+                trail.style.left = e.pageX - 5 + 'px';
+                trail.style.top = e.pageY - 5 + 'px';
+                document.body.appendChild(trail);
+                setTimeout(() => trail.remove(), 600);
+            }
+        });
+    </script>
+</body>
+</html>
